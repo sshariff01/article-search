@@ -16,7 +16,7 @@ public class HttpClient extends AsyncHttpClient {
 
     }
 
-    public void getLatestNewsArticles(ResponseHandlerInterface responseHandler) {
+    public void getNewsArticles(ResponseHandlerInterface responseHandler) {
         String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
         RequestParams requestParams = new RequestParams();
         requestParams.put("api-key", "cec11110d859466dbecb8568a58919f9");

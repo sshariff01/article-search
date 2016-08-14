@@ -1,52 +1,58 @@
 package com.shariffproductions.articlesearch;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class NewsArticleAdapter extends ArrayAdapter<NewsArticle> {
-    private static class NewsArticleHolder {
-        TextView title;
+public class NewsArticleAdapter extends RecyclerView.Adapter<NewsArticleAdapter.ViewHolder> {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView headline;
         ImageView image;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            headline = (TextView) itemView.findViewById(R.id.headline);
+            image = (ImageView) itemView.findViewById(R.id.image);
+        }
     }
 
-    public NewsArticleAdapter(Context context, ArrayList<NewsArticle> newsArticleList) {
-        super(context, R.layout.item_news_article, newsArticleList);
+    public List<NewsArticle> newsArticles;
+    public Context context;
+
+    public NewsArticleAdapter(Context context, List<NewsArticle> newsArticles) {
+        this.newsArticles = newsArticles;
+        this.context = context;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        NewsArticle newsArticle = getItem(position);
-        final NewsArticleHolder newsArticleHolder;
-        if (convertView == null) {
-            newsArticleHolder = new NewsArticleHolder();
-            LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.item_news_article, parent, false);
-            newsArticleHolder.title = (TextView) convertView.findViewById(R.id.title);
-            newsArticleHolder.image = (ImageView) convertView.findViewById(R.id.image);
-            convertView.setTag(newsArticleHolder);
-        } else {
-            newsArticleHolder = (NewsArticleHolder) convertView.getTag();
-        }
-
-        setUpNewsArticleDetails(newsArticle, newsArticleHolder);
-        return convertView;
+    public NewsArticleAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View contactView = inflater.inflate(R.layout.item_news_article, parent, false);
+        ViewHolder viewHolder = new ViewHolder(contactView);
+        return viewHolder;
     }
 
-    private void setUpNewsArticleDetails(NewsArticle newsArticle, NewsArticleHolder newsArticleHolder) {
-        newsArticleHolder.title.setText(newsArticle.title);
-        Picasso.with(getContext())
+    @Override
+    public void onBindViewHolder(NewsArticleAdapter.ViewHolder viewHolder, int position) {
+        NewsArticle newsArticle = newsArticles.get(position);
+        viewHolder.headline.setText(newsArticle.headline);
+        Picasso.with(context)
                 .load(newsArticle.imageUrl)
-                .into(newsArticleHolder.image);
+                .into(viewHolder.image);
     }
 
-
+    @Override
+    public int getItemCount() {
+        return newsArticles.size();
+    }
 }

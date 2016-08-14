@@ -2,7 +2,8 @@ package com.shariffproductions.articlesearch;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.GridView;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -26,22 +27,23 @@ public class MainActivity extends AppCompatActivity {
 
         newsArticles = new ArrayList<>();
         newsArticleAdapter = new NewsArticleAdapter(this, newsArticles);
-        newsArticleAdapter.setNotifyOnChange(true);
 
-        GridView gridView = (GridView) findViewById(R.id.grid_view);
-        gridView.setAdapter(newsArticleAdapter);
+        RecyclerView recyclerGridView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerGridView.setAdapter(newsArticleAdapter);
+        recyclerGridView.setLayoutManager(new GridLayoutManager(this, 4));
 
         populateGridWithNewsArticles();
     }
 
     private void populateGridWithNewsArticles() {
         HttpClient httpClient = HttpClient.getClient();
-        httpClient.getLatestNewsArticles(new JsonHttpResponseHandler() {
+        httpClient.getNewsArticles(new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
-                ArrayList<NewsArticle> newsArticles = parseNewsArticleDetailsFrom(response);
-                newsArticleAdapter.addAll(newsArticles);
+                ArrayList<NewsArticle> fetchedNewsArticles = parseNewsArticleDetailsFrom(response);
+                newsArticles.addAll(fetchedNewsArticles);
+                newsArticleAdapter.notifyDataSetChanged();
             }
 
             @Override
