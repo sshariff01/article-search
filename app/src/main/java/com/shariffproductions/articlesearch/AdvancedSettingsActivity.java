@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -99,6 +100,17 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
             }
         };
         beginDateEditText.addTextChangedListener(textWatcher);
+
+        beginDateEditText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((keyCode == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_UP)) {
+                    exitInputMode();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     public void onCheckboxClicked(View view) {
