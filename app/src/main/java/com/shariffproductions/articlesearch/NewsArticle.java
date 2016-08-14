@@ -1,6 +1,9 @@
 package com.shariffproductions.articlesearch;
 
-public class NewsArticle {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class NewsArticle implements Parcelable {
     public String headline;
     public String imageUrl;
 
@@ -14,5 +17,33 @@ public class NewsArticle {
             return null;
         }
         return "http://www.nytimes.com/" + imageUrl;
+    }
+
+    protected NewsArticle(Parcel in) {
+        headline = in.readString();
+        imageUrl = in.readString();
+    }
+
+    public static final Creator<NewsArticle> CREATOR = new Creator<NewsArticle>() {
+        @Override
+        public NewsArticle createFromParcel(Parcel in) {
+            return new NewsArticle(in);
+        }
+
+        @Override
+        public NewsArticle[] newArray(int size) {
+            return new NewsArticle[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(headline);
+        dest.writeString(imageUrl);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }

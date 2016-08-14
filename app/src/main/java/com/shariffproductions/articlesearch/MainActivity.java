@@ -28,6 +28,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
     private static final int UPDATE_ADVANCED_SETTINGS = 1;
+    private final static String SAVED_INSTANCE_KEY_NEWS_ARTICLES_LIST = "newsArticlesList";
     private NewsArticleAdapter newsArticleAdapter;
     private ArrayList<NewsArticle> newsArticles;
     private EditText searchFilterEditText;
@@ -41,7 +42,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initActivityLayoutOnClickListener();
         initSearchFilter();
-        initNewsArticlesGridView();
+        initNewsArticlesGridView(savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelableArrayList(SAVED_INSTANCE_KEY_NEWS_ARTICLES_LIST, newsArticles);
     }
 
     @Override
@@ -98,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if ((keyCode == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_UP)) {
-                    searchForNewsArticles(v);
+                    exitInputMode();
                     return true;
                 }
                 return false;
@@ -106,8 +113,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initNewsArticlesGridView() {
-        newsArticles = new ArrayList<>();
+    private void initNewsArticlesGridView(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            newsArticles = new ArrayList<>();
+        } else {
+            newsArticles = savedInstanceState.getParcelableArrayList(SAVED_INSTANCE_KEY_NEWS_ARTICLES_LIST);
+        }
         newsArticleAdapter = new NewsArticleAdapter(this, newsArticles);
 
         RecyclerView recyclerGridView = (RecyclerView) findViewById(R.id.recycler_view);
