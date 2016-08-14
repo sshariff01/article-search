@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initActivityLayoutOnClickListener();
+        initSearchFilter();
         initNewsArticlesGridView();
     }
 
@@ -79,18 +80,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initNewsArticlesGridView() {
-        newsArticles = new ArrayList<>();
-        newsArticleAdapter = new NewsArticleAdapter(this, newsArticles);
-
-        RecyclerView recyclerGridView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerGridView.setAdapter(newsArticleAdapter);
-        recyclerGridView.setLayoutManager(new GridLayoutManager(this, 4));
-    }
-
     private void initActivityLayoutOnClickListener() {
         LinearLayout activityLayout = (LinearLayout) findViewById(R.id.activity_main);
-        searchFilterEditText = (EditText) findViewById(R.id.search_filter);
+        activityLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (view.getId() != R.id.et_search) {
+                    exitInputMode();
+                }
+            }
+        });
+    }
+
+    private void initSearchFilter() {
+        searchFilterEditText = (EditText) findViewById(R.id.et_search);
         searchFilterEditText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -101,14 +104,15 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        activityLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (view.getId() != R.id.search_filter) {
-                    exitInputSearchFilterMode();
-                }
-            }
-        });
+    }
+
+    private void initNewsArticlesGridView() {
+        newsArticles = new ArrayList<>();
+        newsArticleAdapter = new NewsArticleAdapter(this, newsArticles);
+
+        RecyclerView recyclerGridView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerGridView.setAdapter(newsArticleAdapter);
+        recyclerGridView.setLayoutManager(new GridLayoutManager(this, 4));
     }
 
     public void searchForNewsArticles(View view) {
@@ -126,17 +130,23 @@ public class MainActivity extends AppCompatActivity {
                         newsArticles.clear();
                         newsArticles.addAll(fetchedNewsArticles);
                         newsArticleAdapter.notifyDataSetChanged();
-                        exitInputSearchFilterMode();
+                        exitInputMode();
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                         super.onFailure(statusCode, headers, responseString, throwable);
-                        exitInputSearchFilterMode();
+                        exitInputMode();
                         Toast.makeText(MainActivity.this, "Failed to load news article data", Toast.LENGTH_LONG).show();
                     }
                 }
         );
+    }
+
+    private void exitInputMode() {
+        searchFilterEditText.clearFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
     private ArrayList<NewsArticle> parseNewsArticleDetailsFrom(JSONObject response) {
@@ -158,12 +168,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return newsArticleList;
-    }
-
-    private void exitInputSearchFilterMode() {
-        searchFilterEditText.clearFocus();
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
     @Override

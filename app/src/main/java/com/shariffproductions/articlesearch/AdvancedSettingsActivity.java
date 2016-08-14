@@ -1,5 +1,6 @@
 package com.shariffproductions.articlesearch;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,9 +8,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import java.util.Arrays;
@@ -18,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 public class AdvancedSettingsActivity extends AppCompatActivity {
-    private EditText beginDate;
+    private EditText beginDateEditText;
     private Spinner sortOrderSpinner;
     private List<String> sortOrderOptions = Arrays.asList("Oldest", "Newest");
     private HashMap<String, Boolean> newsDeskValuesMap = new HashMap<>();
 
     public void save(View view) {
         Intent data = new Intent();
-        data.putExtra("beginDate", beginDate.getText().toString());
+        data.putExtra("beginDate", beginDateEditText.getText().toString());
         data.putExtra("sortOrder", sortOrderSpinner.getSelectedItem().toString());
         for (Map.Entry<String, Boolean> newsDeskValue : newsDeskValuesMap.entrySet()) {
             if (newsDeskValue.getValue()) {
@@ -40,20 +43,38 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_advanced_settings);
-
-        setUpBeginDateFilter();
-        setUpSortOrderFilter();
+        initActivityLayoutOnClickListener();
+        initBeginDateFilter();
+        initSortOrderFilter();
     }
 
-    private void setUpSortOrderFilter() {
+    private void initActivityLayoutOnClickListener() {
+        LinearLayout activityLayout = (LinearLayout) findViewById(R.id.activity_advanced_settings);
+        activityLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (view.getId() != R.id.et_begin_date) {
+                    exitInputMode();
+                }
+            }
+        });
+    }
+
+    private void exitInputMode() {
+        beginDateEditText.clearFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+    }
+
+    private void initSortOrderFilter() {
         ArrayAdapter<String> sortOrderArrayAdapter = new ArrayAdapter<>(this, R.layout.sort_order_spinner_item, R.id.sort_order, sortOrderOptions);
         sortOrderSpinner = (Spinner) findViewById(R.id.spinner_sort_order);
         sortOrderSpinner.setAdapter(sortOrderArrayAdapter);
         sortOrderSpinner.setSelection(sortOrderArrayAdapter.getPosition("Newest"));
     }
 
-    private void setUpBeginDateFilter() {
-        beginDate = (EditText) findViewById(R.id.et_begin_date);
+    private void initBeginDateFilter() {
+        beginDateEditText = (EditText) findViewById(R.id.et_begin_date);
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -67,17 +88,17 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                switch(beginDate.getText().length()) {
+                switch(beginDateEditText.getText().length()) {
                     case 2:
-                        beginDate.append("/");
+                        beginDateEditText.append("/");
                         break;
                     case 5:
-                        beginDate.append("/");
+                        beginDateEditText.append("/");
                         break;
                 }
             }
         };
-        beginDate.addTextChangedListener(textWatcher);
+        beginDateEditText.addTextChangedListener(textWatcher);
     }
 
     public void onCheckboxClicked(View view) {
