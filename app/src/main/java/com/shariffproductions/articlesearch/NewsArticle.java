@@ -6,6 +6,13 @@ public class NewsArticle {
 
     public NewsArticle(String headline, String imageUrl) {
         this.headline = headline;
-        this.imageUrl = "http://www.nytimes.com/" + imageUrl;
+        this.imageUrl = setImageUrl(imageUrl);
+    }
+
+    private String setImageUrl(String imageUrl) {
+        if (imageUrl == null) {
+            return null;
+        }
+        return "http://www.nytimes.com/" + imageUrl;
     }
 }

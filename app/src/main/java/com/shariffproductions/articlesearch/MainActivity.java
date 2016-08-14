@@ -1,9 +1,17 @@
 package com.shariffproductions.articlesearch;
 
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -19,37 +27,44 @@ import cz.msebera.android.httpclient.Header;
 public class MainActivity extends AppCompatActivity {
     private NewsArticleAdapter newsArticleAdapter;
     private ArrayList<NewsArticle> newsArticles;
+    private EditText searchFilterEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initActivityLayoutOnClickListener();
+        initNewsArticlesGridView();
+    }
 
+    private void initNewsArticlesGridView() {
         newsArticles = new ArrayList<>();
         newsArticleAdapter = new NewsArticleAdapter(this, newsArticles);
 
         RecyclerView recyclerGridView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerGridView.setAdapter(newsArticleAdapter);
         recyclerGridView.setLayoutManager(new GridLayoutManager(this, 4));
-
-        populateGridWithNewsArticles();
     }
 
-    private void populateGridWithNewsArticles() {
-        HttpClient httpClient = HttpClient.getClient();
-        httpClient.getNewsArticles(new JsonHttpResponseHandler() {
+    private void initActivityLayoutOnClickListener() {
+        LinearLayout activityLayout = (LinearLayout) findViewById(R.id.activity_main);
+        searchFilterEditText = (EditText) findViewById(R.id.search_filter);
+        searchFilterEditText.setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-                ArrayList<NewsArticle> fetchedNewsArticles = parseNewsArticleDetailsFrom(response);
-                newsArticles.addAll(fetchedNewsArticles);
-                newsArticleAdapter.notifyDataSetChanged();
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((keyCode == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_UP)) {
+                    searchForNewsArticles(v);
+                    return true;
+                }
+                return false;
             }
-
+        });
+        activityLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-                Toast.makeText(MainActivity.this, "Failed to load news article data", Toast.LENGTH_LONG).show();
+            public void onClick(View view) {
+                if (view.getId() != R.id.search_filter) {
+                    exitInputSearchFilterMode();
+                }
             }
         });
     }
@@ -63,7 +78,8 @@ public class MainActivity extends AppCompatActivity {
             for(int i = 0; i < articlesJsonArray.length(); i++) {
                 articleJson = articlesJsonArray.getJSONObject(i);
                 String headline = articleJson.getJSONObject("headline").getString("main");
-                String imageUrl = articleJson.getJSONArray("multimedia").getJSONObject(1).getString("url");
+                JSONArray multimedia = articleJson.getJSONArray("multimedia");
+                String imageUrl = (multimedia.length() > 0) ? multimedia.getJSONObject(0).getString("url") : null;
                 newsArticle = new NewsArticle(headline, imageUrl);
                 newsArticleList.add(newsArticle);
             }
@@ -72,5 +88,32 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return newsArticleList;
+    }
+
+    public void searchForNewsArticles(View view) {
+        HttpClient httpClient = HttpClient.getClient();
+        httpClient.getNewsArticles(searchFilterEditText.getText().toString(), new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
+                ArrayList<NewsArticle> fetchedNewsArticles = parseNewsArticleDetailsFrom(response);
+                newsArticles.addAll(fetchedNewsArticles);
+                newsArticleAdapter.notifyDataSetChanged();
+                exitInputSearchFilterMode();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+                exitInputSearchFilterMode();
+                Toast.makeText(MainActivity.this, "Failed to load news article data", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void exitInputSearchFilterMode() {
+        searchFilterEditText.clearFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 }
