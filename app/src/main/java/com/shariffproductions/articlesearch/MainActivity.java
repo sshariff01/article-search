@@ -130,12 +130,14 @@ public class MainActivity extends AppCompatActivity {
                         newsArticles.clear();
                         newsArticles.addAll(fetchedNewsArticles);
                         newsArticleAdapter.notifyDataSetChanged();
+                        searchFilterEditText.setText("");
                         exitInputMode();
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                         super.onFailure(statusCode, headers, responseString, throwable);
+                        searchFilterEditText.setText("");
                         exitInputMode();
                         Toast.makeText(MainActivity.this, "Failed to load news article data", Toast.LENGTH_LONG).show();
                     }
