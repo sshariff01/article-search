@@ -1,25 +1,40 @@
 package com.shariffproductions.articlesearch;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AdvancedSettingsActivity extends AppCompatActivity {
     private EditText beginDate;
-    private final List<String> sortOrderOptions = Arrays.asList("Oldest", "Newest");
+    private Spinner sortOrderSpinner;
+    private List<String> sortOrderOptions = Arrays.asList("Oldest", "Newest");
+    private HashMap<String, Boolean> newsDeskValuesMap = new HashMap<>();
+
+    public void save(View view) {
+        Intent data = new Intent();
+        data.putExtra("beginDate", beginDate.getText().toString());
+        data.putExtra("sortOrder", sortOrderSpinner.getSelectedItem().toString());
+        for (Map.Entry<String, Boolean> newsDeskValue : newsDeskValuesMap.entrySet()) {
+            if (newsDeskValue.getValue()) {
+                data.putExtra(newsDeskValue.getKey(), true);
+            }
+        }
+        setResult(RESULT_OK, data);
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +47,7 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
 
     private void setUpSortOrderFilter() {
         ArrayAdapter<String> sortOrderArrayAdapter = new ArrayAdapter<>(this, R.layout.sort_order_spinner_item, R.id.sort_order, sortOrderOptions);
-        Spinner sortOrderSpinner = (Spinner) findViewById(R.id.spinner_sort_order);
+        sortOrderSpinner = (Spinner) findViewById(R.id.spinner_sort_order);
         sortOrderSpinner.setAdapter(sortOrderArrayAdapter);
         sortOrderSpinner.setSelection(sortOrderArrayAdapter.getPosition("Newest"));
     }
@@ -63,5 +78,21 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
             }
         };
         beginDate.addTextChangedListener(textWatcher);
+    }
+
+    public void onCheckboxClicked(View view) {
+        boolean checked = ((CheckBox) view).isChecked();
+
+        switch(view.getId()) {
+            case R.id.checkbox_arts:
+                newsDeskValuesMap.put("Arts", checked);
+                break;
+            case R.id.checkbox_fashion_style:
+                newsDeskValuesMap.put("Fashion & Style", checked);
+                break;
+            case R.id.sports:
+                newsDeskValuesMap.put("Sports", checked);
+                break;
+        }
     }
 }

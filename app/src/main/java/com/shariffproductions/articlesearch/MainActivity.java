@@ -22,13 +22,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int UPDATE_ADVANCED_SETTINGS = 1;
     private NewsArticleAdapter newsArticleAdapter;
     private ArrayList<NewsArticle> newsArticles;
     private EditText searchFilterEditText;
+    private String beginDate;
+    private String sortOrder;
+    private List<String> newsDeskValues = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,36 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == UPDATE_ADVANCED_SETTINGS) {
+            if (resultCode != RESULT_OK) return;
+            beginDate = parseBeginDate(data);
+            sortOrder = data.getStringExtra("sortOrder");
+            saveNewsDeskValues(data);
+        }
+    }
+
+    private String parseBeginDate(Intent data) {
+        String[] beginDateComponents = data.getStringExtra("beginDate").split("/");
+        String day = beginDateComponents[0];
+        String month = beginDateComponents[1];
+        String year = beginDateComponents[2];
+        return year + month + day;
+    }
+
+    private void saveNewsDeskValues(Intent data) {
+        parseNewsDeskVaue(data, "Arts");
+        parseNewsDeskVaue(data, "Fashion & Style");
+        parseNewsDeskVaue(data, "Sports");
+    }
+
+    private void parseNewsDeskVaue(Intent data, String newsDeskValue) {
+        if (data.getBooleanExtra(newsDeskValue, false)) {
+            newsDeskValues.add(newsDeskValue);
+        }
     }
 
     private void initNewsArticlesGridView() {
@@ -76,6 +111,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void searchForNewsArticles(View view) {
+        HttpClient httpClient = HttpClient.getClient();
+        httpClient.getNewsArticles(
+                searchFilterEditText.getText().toString(),
+                beginDate,
+                sortOrder,
+                newsDeskValues,
+                new JsonHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        super.onSuccess(statusCode, headers, response);
+                        ArrayList<NewsArticle> fetchedNewsArticles = parseNewsArticleDetailsFrom(response);
+                        newsArticles.clear();
+                        newsArticles.addAll(fetchedNewsArticles);
+                        newsArticleAdapter.notifyDataSetChanged();
+                        exitInputSearchFilterMode();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        super.onFailure(statusCode, headers, responseString, throwable);
+                        exitInputSearchFilterMode();
+                        Toast.makeText(MainActivity.this, "Failed to load news article data", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+    }
+
     private ArrayList<NewsArticle> parseNewsArticleDetailsFrom(JSONObject response) {
         ArrayList<NewsArticle> newsArticleList = new ArrayList<>();
         try {
@@ -97,27 +160,6 @@ public class MainActivity extends AppCompatActivity {
         return newsArticleList;
     }
 
-    public void searchForNewsArticles(View view) {
-        HttpClient httpClient = HttpClient.getClient();
-        httpClient.getNewsArticles(searchFilterEditText.getText().toString(), new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-                ArrayList<NewsArticle> fetchedNewsArticles = parseNewsArticleDetailsFrom(response);
-                newsArticles.addAll(fetchedNewsArticles);
-                newsArticleAdapter.notifyDataSetChanged();
-                exitInputSearchFilterMode();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-                exitInputSearchFilterMode();
-                Toast.makeText(MainActivity.this, "Failed to load news article data", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
     private void exitInputSearchFilterMode() {
         searchFilterEditText.clearFocus();
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -137,6 +179,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void openAdvancedSettings() {
         Intent intent = new Intent(MainActivity.this, AdvancedSettingsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, UPDATE_ADVANCED_SETTINGS);
     }
 }

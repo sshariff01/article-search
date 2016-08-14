@@ -77,17 +77,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:text="@string/arts" />
+                android:text="@string/arts"
+                android:onClick="onCheckboxClicked" />
             <CheckBox android:id="@+id/checkbox_fashion_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:text="@string/fashion_amp_style" />
+                android:text="@string/fashion_amp_style"
+                android:onClick="onCheckboxClicked" />
             <CheckBox android:id="@+id/sports"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:text="@string/sports" />
+                android:text="@string/sports"
+                android:onClick="onCheckboxClicked" />
         </LinearLayout>
     </LinearLayout>
 
@@ -103,7 +106,8 @@
             android:text="@string/save"
             android:background="#0000FF"
             android:textColor="#FFFFFF"
-            style="?android:attr/borderlessButtonStyle"/>
+            style="?android:attr/borderlessButtonStyle"
+            android:onClick="save" />
     </LinearLayout>
 
 </LinearLayout>
