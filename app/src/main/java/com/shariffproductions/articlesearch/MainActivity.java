@@ -61,18 +61,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == UPDATE_ADVANCED_SETTINGS) {
             if (resultCode != RESULT_OK) return;
-            beginDate = parseBeginDate(data);
+            beginDate = data.getStringExtra("beginDate");
             sortOrder = data.getStringExtra("sortOrder");
             saveNewsDeskValues(data);
         }
-    }
-
-    private String parseBeginDate(Intent data) {
-        String[] beginDateComponents = data.getStringExtra("beginDate").split("/");
-        String day = beginDateComponents[0];
-        String month = beginDateComponents[1];
-        String year = beginDateComponents[2];
-        return year + month + day;
     }
 
     private void saveNewsDeskValues(Intent data) {
@@ -197,6 +189,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void openAdvancedSettings() {
         Intent intent = new Intent(MainActivity.this, AdvancedSettingsActivity.class);
+        intent.putExtra("beginDate", beginDate);
+        intent.putExtra("sortOrder", sortOrder);
+        for (String newsDeskValue : newsDeskValues) {
+            intent.putExtra(newsDeskValue, true);
+        }
         startActivityForResult(intent, UPDATE_ADVANCED_SETTINGS);
     }
 }

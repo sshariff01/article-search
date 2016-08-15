@@ -44,9 +44,11 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_advanced_settings);
+        Intent data = getIntent();
         initActivityLayoutOnClickListener();
-        initBeginDateFilter();
-        initSortOrderFilter();
+        initBeginDateFilter(data);
+        initSortOrderFilter(data);
+        initNewDeskValuesCheckBoxes(data);
     }
 
     private void initActivityLayoutOnClickListener() {
@@ -67,15 +69,13 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
-    private void initSortOrderFilter() {
-        ArrayAdapter<String> sortOrderArrayAdapter = new ArrayAdapter<>(this, R.layout.sort_order_spinner_item, R.id.sort_order, sortOrderOptions);
-        sortOrderSpinner = (Spinner) findViewById(R.id.spinner_sort_order);
-        sortOrderSpinner.setAdapter(sortOrderArrayAdapter);
-        sortOrderSpinner.setSelection(sortOrderArrayAdapter.getPosition("Newest"));
-    }
-
-    private void initBeginDateFilter() {
+    private void initBeginDateFilter(Intent data) {
         beginDateEditText = (EditText) findViewById(R.id.et_begin_date);
+
+        if (data.getStringExtra("beginDate") != null) {
+            beginDateEditText.setText(data.getStringExtra("beginDate"));
+        }
+
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -111,6 +111,31 @@ public class AdvancedSettingsActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void initSortOrderFilter(Intent data) {
+        ArrayAdapter<String> sortOrderArrayAdapter = new ArrayAdapter<>(this, R.layout.sort_order_spinner_item, R.id.sort_order, sortOrderOptions);
+        sortOrderSpinner = (Spinner) findViewById(R.id.spinner_sort_order);
+        sortOrderSpinner.setAdapter(sortOrderArrayAdapter);
+
+        if (data.getStringExtra("sortOrder") != null) {
+            sortOrderSpinner.setSelection(sortOrderArrayAdapter.getPosition(data.getStringExtra("sortOrder")));
+        } else {
+            sortOrderSpinner.setSelection(sortOrderArrayAdapter.getPosition("Newest"));
+        }
+    }
+
+    private void initNewDeskValuesCheckBoxes(Intent data) {
+        initCheckbox(data, "Arts", R.id.checkbox_arts);
+        initCheckbox(data, "Fashion & Style", R.id.checkbox_fashion_style);
+        initCheckbox(data, "Sports", R.id.sports);
+    }
+
+    private void initCheckbox(Intent data, String newsDeskValue, int checkbox_arts) {
+        if (data.getBooleanExtra(newsDeskValue, false)) {
+            CheckBox checkBox = (CheckBox) this.findViewById(checkbox_arts);
+            checkBox.setChecked(true);
+        }
     }
 
     public void onCheckboxClicked(View view) {

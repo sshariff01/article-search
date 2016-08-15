@@ -30,7 +30,7 @@ public class HttpClient extends AsyncHttpClient {
             requestParams.put("q", searchFilter);
         }
         if (isDefined(beginDate)) {
-            requestParams.put("begin_date", beginDate);
+            requestParams.put("begin_date", getParseDateFrom(beginDate));
         }
         if (isDefined(sortOrder)) {
             requestParams.put("sort", sortOrder);
@@ -40,6 +40,14 @@ public class HttpClient extends AsyncHttpClient {
         }
 
         this.get(url, requestParams, responseHandler);
+    }
+
+    private Object getParseDateFrom(String beginDate) {
+        String[] beginDateComponents = beginDate.split("/");
+        String day = beginDateComponents[0];
+        String month = beginDateComponents[1];
+        String year = beginDateComponents[2];
+        return year + month + day;
     }
 
     private String buildNewsDeskValuesFilterQuery(List<String> newsDeskValues) {
