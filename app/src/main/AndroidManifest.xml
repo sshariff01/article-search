@@ -17,7 +17,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AdvancedSettingsActivity" android:label="Advanced Settings" />
+        <activity
+            android:name=".AdvancedSettingsActivity"
+            android:label="Advanced Settings" />
+        <activity android:name=".NewsArticleWebActivity"></activity>
     </application>
 
 </manifest>

@@ -171,9 +171,10 @@ public class MainActivity extends AppCompatActivity {
             for(int i = 0; i < articlesJsonArray.length(); i++) {
                 articleJson = articlesJsonArray.getJSONObject(i);
                 String headline = articleJson.getJSONObject("headline").getString("main");
+                String webUrl = articleJson.getString("web_url");
                 JSONArray multimedia = articleJson.getJSONArray("multimedia");
                 String imageUrl = (multimedia.length() > 0) ? multimedia.getJSONObject(0).getString("url") : null;
-                newsArticle = new NewsArticle(headline, imageUrl);
+                newsArticle = new NewsArticle(headline, imageUrl, webUrl);
                 newsArticleList.add(newsArticle);
             }
         } catch (JSONException e) {

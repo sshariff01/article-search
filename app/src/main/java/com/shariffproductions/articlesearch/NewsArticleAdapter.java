@@ -1,6 +1,7 @@
 package com.shariffproductions.articlesearch;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,20 +14,31 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class NewsArticleAdapter extends RecyclerView.Adapter<NewsArticleAdapter.ViewHolder> {
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView headline;
-        ImageView image;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            headline = (TextView) itemView.findViewById(R.id.headline);
-            image = (ImageView) itemView.findViewById(R.id.image);
-        }
-    }
-
     public List<NewsArticle> newsArticles;
     public Context context;
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView headline;
+        ImageView image;
+        Context context;
+
+        public ViewHolder(Context context, View itemView) {
+            super(itemView);
+            this.headline = (TextView) itemView.findViewById(R.id.headline);
+            this.image = (ImageView) itemView.findViewById(R.id.image);
+            this.context = context;
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int position = getLayoutPosition();
+            NewsArticle newsArticle = newsArticles.get(position);
+            Intent intent = new Intent(this.context, NewsArticleWebActivity.class);
+            intent.putExtra("webUrl", newsArticle.webUrl);
+            this.context.startActivity(intent);
+        }
+    }
 
     public NewsArticleAdapter(Context context, List<NewsArticle> newsArticles) {
         this.newsArticles = newsArticles;
@@ -37,8 +49,14 @@ public class NewsArticleAdapter extends RecyclerView.Adapter<NewsArticleAdapter.
     public NewsArticleAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        View contactView = inflater.inflate(R.layout.item_news_article, parent, false);
-        ViewHolder viewHolder = new ViewHolder(contactView);
+        View view = inflater.inflate(R.layout.item_news_article, parent, false);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        ViewHolder viewHolder = new ViewHolder(context, view);
         return viewHolder;
     }
 

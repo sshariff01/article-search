@@ -6,10 +6,12 @@ import android.os.Parcelable;
 public class NewsArticle implements Parcelable {
     public String headline;
     public String imageUrl;
+    public String webUrl;
 
-    public NewsArticle(String headline, String imageUrl) {
+    public NewsArticle(String headline, String imageUrl, String webUrl) {
         this.headline = headline;
         this.imageUrl = setImageUrl(imageUrl);
+        this.webUrl = webUrl;
     }
 
     private String setImageUrl(String imageUrl) {
