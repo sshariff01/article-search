@@ -64,15 +64,11 @@ public class NewsArticleAdapter extends RecyclerView.Adapter<NewsArticleAdapter.
     public void onBindViewHolder(NewsArticleAdapter.ViewHolder viewHolder, int position) {
         NewsArticle newsArticle = newsArticles.get(position);
         viewHolder.headline.setText(newsArticle.headline);
-        if (newsArticle.imageUrl == null) {
-            Picasso.with(context)
-                    .load(R.drawable.default_article_icon)
-                    .into(viewHolder.image);
-        } else {
-            Picasso.with(context)
-                    .load(newsArticle.imageUrl)
-                    .into(viewHolder.image);
-        }
+        Picasso.with(context)
+                .load(newsArticle.imageUrl)
+                .fit()
+                .placeholder(R.drawable.default_article_icon)
+                .into(viewHolder.image);
     }
 
     @Override
