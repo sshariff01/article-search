@@ -50,14 +50,7 @@ public class NewsArticleAdapter extends RecyclerView.Adapter<NewsArticleAdapter.
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_news_article, parent, false);
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-        ViewHolder viewHolder = new ViewHolder(context, view);
-        return viewHolder;
+        return new ViewHolder(context, view);
     }
 
     @Override
