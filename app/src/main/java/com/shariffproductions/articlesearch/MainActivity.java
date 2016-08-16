@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private NewsArticleAdapter newsArticleAdapter;
     private ArrayList<NewsArticle> newsArticles;
     private EditText searchFilterEditText;
+    private Button searchButton;
     private String beginDate;
     private String sortOrder;
     private List<String> newsDeskValues = new ArrayList<>();
@@ -103,6 +105,14 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+        searchButton = (Button) findViewById(R.id.search_button);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newsArticles.clear();
+                searchForNewsArticles(0);
+            }
+        });
     }
 
     private void initNewsArticlesGridView(Bundle savedInstanceState) {
@@ -115,22 +125,29 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerGridView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerGridView.setAdapter(newsArticleAdapter);
-        recyclerGridView.setLayoutManager(new GridLayoutManager(this, 4));
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 4);
+        recyclerGridView.setLayoutManager(gridLayoutManager);
+        recyclerGridView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                searchForNewsArticles(page);
+            }
+        });
     }
 
-    public void searchForNewsArticles(View view) {
+    public void searchForNewsArticles(int pageNumber) {
         HttpClient httpClient = HttpClient.getClient();
         httpClient.getNewsArticles(
                 searchFilterEditText.getText().toString(),
                 beginDate,
                 sortOrder,
                 newsDeskValues,
+                pageNumber,
                 new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         super.onSuccess(statusCode, headers, response);
                         ArrayList<NewsArticle> fetchedNewsArticles = parseNewsArticleDetailsFrom(response);
-                        newsArticles.clear();
                         newsArticles.addAll(fetchedNewsArticles);
                         newsArticleAdapter.notifyDataSetChanged();
                         searchFilterEditText.setText("");

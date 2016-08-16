@@ -22,10 +22,12 @@ public class HttpClient extends AsyncHttpClient {
                                 String beginDate,
                                 String sortOrder,
                                 List<String> newsDeskValues,
+                                int pageNumber,
                                 ResponseHandlerInterface responseHandler) {
         String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
         RequestParams requestParams = new RequestParams();
         requestParams.put("api-key", "cec11110d859466dbecb8568a58919f9");
+        requestParams.put("page", pageNumber);
         if (isDefined(searchFilter)) {
             requestParams.put("q", searchFilter);
         }

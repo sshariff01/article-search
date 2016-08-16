@@ -31,8 +31,7 @@
             android:text="@string/search"
             android:background="#0000FF"
             android:textColor="#FFFFFF"
-            style="?android:attr/borderlessButtonStyle"
-            android:onClick="searchForNewsArticles" />
+            style="?android:attr/borderlessButtonStyle" />
     </LinearLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
